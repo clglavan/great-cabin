@@ -1,0 +1,433 @@
+{{ define "header" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- <meta http-equiv="refresh" content="10"> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@3.14.0/dist/js-yaml.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-yaml.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
+  
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+
+<title>Great Cabin</title>
+
+<style>
+  /* th {
+  text-align: left;
+} */
+</style>
+</head>
+<body>
+
+<h1 class="text-center">Great Cabin</h1>
+
+<div class="container">
+
+<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary" style="background-color: #e3f2fd;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Overview</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Workloads
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/pods">Pods</a></li>
+            <li><a class="dropdown-item" href="/deployments">Deployments</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">DaemonSets</a></li>
+            <li><a class="dropdown-item" href="#">StatefulSets</a></li>
+            <li><a class="dropdown-item" href="#">Jobs</a></li>
+            <li><a class="dropdown-item" href="#">CronJobs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Config
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">ConfigMaps</a></li>
+            <li><a class="dropdown-item" href="#">Secrets</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">HPA</a></li>
+            <li><a class="dropdown-item" href="#">Pod Distruption Budgets</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Network
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Ingresses</a></li>
+            <li><a class="dropdown-item" href="#">Services</a></li>
+            <li><a class="dropdown-item" href="#">Endpoints</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Ingress Classes</a></li>
+            <li><a class="dropdown-item" href="#">Network Policies</a></li>
+            <li><a class="dropdown-item" href="#">Port Forwarding</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Storage
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Persistent Volume Claims</a></li>
+            <li><a class="dropdown-item" href="#">Persistent Volumes</a></li>
+            <li><a class="dropdown-item" href="#">Storage Classes</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Access Controls
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Service Accounts</a></li>
+            <li><a class="dropdown-item" href="#">Cluster Roles</a></li>
+            <li><a class="dropdown-item" href="#">Roles</a></li>
+            <li><a class="dropdown-item" href="#">Cluster Role Bindings</a></li>
+            <li><a class="dropdown-item" href="#">Role Bindings</a></li>
+            <li><a class="dropdown-item" href="#">Pod Security Policies</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/events">Events</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/events-timeline">Events Timeline</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" aria-disabled="true">Helm</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" aria-disabled="true">CRDs</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="namespaceLabel" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Namespaces
+          </a>
+          <ul id="namespaces" class="dropdown-menu">
+
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+</div>
+
+<div class="text-center">
+
+    <div class="row">
+  
+      <div class="col">
+        
+            
+            <table id="dataTable" class="table table-hover">
+              
+            </table>
+      
+        </div>
+        
+    </div>
+  
+  </div>
+
+{{ end }}
+
+{{ define "footer" }}
+
+
+<!-- Modal -->
+<div class="modal fade modal-xl" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modalLabel"></h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          
+        </div>
+        <div id="modal-footer" class="modal-footer">
+          <button type="button" id="save" class="btn btn-success">Save</button>
+          <button type="button" id="close" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+  
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong id="header-text" class="me-auto">Error Message</strong>
+        <!-- <small>11 mins ago</small> -->
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Hello, world! This is a toast message.
+      </div>
+    </div>
+</div>
+
+    <script>
+        // Get the current namespace from the query string
+        var urlParams = new URLSearchParams(window.location.search);
+        var currentNamespace = urlParams.get('namespace') || 'All namespaces';
+
+        // Set the text of the dropdown toggle to the current namespace
+        var dropdownToggle = document.querySelector('#namespaceLabel');
+        dropdownToggle.textContent = currentNamespace;
+
+        function getAge(creationTimestamp) {
+            var ageInMilliseconds = new Date() - creationTimestamp;
+            var ageInSeconds = Math.floor(ageInMilliseconds / 1000);
+            var ageInMinutes = Math.floor(ageInSeconds / 60);
+            var ageInHours = Math.floor(ageInMinutes / 60);
+            var ageInDays = Math.floor(ageInHours / 24);
+
+            if (ageInDays > 0) {
+                return ageInDays + ' days';
+            } else if (ageInHours > 0) {
+                return ageInHours + ' hours';
+            } else if (ageInMinutes > 0) {
+                return ageInMinutes + ' minutes';
+            } else {
+                return ageInSeconds + ' seconds';
+            }
+        }
+
+        // take the already existing query string and pass it (like the namespace)
+        document.querySelectorAll('.dropdown-item').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                // Get the current query string parameters
+                var queryString = window.location.search;
+
+                // Append the query string parameters to the link href
+                var newHref = link.getAttribute('href') + queryString;
+
+                // Navigate to the new href
+                window.location.href = newHref;
+            });
+        });
+
+
+        function handleRowClick(tr, data, dataUrl, modalLabelContent) {
+            tr.onclick = function() {
+                fetch(dataUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        var modalBody = document.querySelector('#modal .modal-body');
+                        modalBody.innerHTML = ''; // Clear the modal body
+
+                        
+                        // Create Bootstrap tabs
+                        var ul = document.createElement('ul');
+                        ul.className = 'nav nav-pills mb-3';
+                        ul.id = 'pills-tab';
+                        ul.setAttribute('role', 'tablist');
+
+                        var liView = document.createElement('li');
+                        liView.className = 'nav-item';
+                        liView.setAttribute('role', 'presentation');
+                        var btnView = document.createElement('button');
+                        btnView.className = 'nav-link active';
+                        btnView.id = 'pills-view-tab';
+                        btnView.setAttribute('data-bs-toggle', 'pill');
+                        btnView.setAttribute('data-bs-target', '#pills-view');
+                        btnView.setAttribute('type', 'button');
+                        btnView.setAttribute('role', 'tab');
+                        btnView.setAttribute('aria-controls', 'pills-view');
+                        btnView.setAttribute('aria-selected', 'true');
+                        btnView.textContent = 'View';
+                        liView.appendChild(btnView);
+
+                        var liEdit = document.createElement('li');
+                        liEdit.className = 'nav-item';
+                        liEdit.setAttribute('role', 'presentation');
+                        var btnEdit = document.createElement('button');
+                        btnEdit.className = 'nav-link';
+                        btnEdit.id = 'pills-edit-tab';
+                        btnEdit.setAttribute('data-bs-toggle', 'pill');
+                        btnEdit.setAttribute('data-bs-target', '#pills-edit');
+                        btnEdit.setAttribute('type', 'button');
+                        btnEdit.setAttribute('role', 'tab');
+                        btnEdit.setAttribute('aria-controls', 'pills-edit');
+                        btnEdit.setAttribute('aria-selected', 'false');
+                        btnEdit.textContent = 'Edit';
+                        liEdit.appendChild(btnEdit);
+
+                        ul.appendChild(liView);
+                        ul.appendChild(liEdit);
+                        modalBody.appendChild(ul);
+
+                        var tabContent = document.createElement('div');
+                        tabContent.className = 'tab-content';
+                        tabContent.id = 'pills-tabContent';
+
+                        var tabPaneView = document.createElement('div');
+                        tabPaneView.className = 'tab-pane fade show active';
+                        tabPaneView.id = 'pills-view';
+                        tabPaneView.setAttribute('role', 'tabpanel');
+                        tabPaneView.setAttribute('aria-labelledby', 'pills-view-tab');
+                        // var pre = document.createElement('pre');
+                    
+                        // pre.textContent = jsyaml.dump(data.data);
+                        // tabPaneView.appendChild(pre);
+
+                        var pre = document.createElement('pre');
+                        pre.className = 'language-yaml';
+                        var code = document.createElement('code');
+                        code.className = 'language-yaml';
+                        code.textContent = jsyaml.dump(data.data);
+                        pre.style.maxHeight = '70vh'; // Set the max height to 80% of the viewport height
+                        pre.style.overflow = 'auto'; // Make the content scrollable if it exceeds the max height
+                        pre.appendChild(code);
+                        Prism.highlightElement(code);
+                        tabPaneView.appendChild(pre);
+
+                        var tabPaneEdit = document.createElement('div');
+                        tabPaneEdit.className = 'tab-pane fade';
+                        tabPaneEdit.id = 'pills-edit';
+                        tabPaneEdit.setAttribute('role', 'tabpanel');
+                        tabPaneEdit.setAttribute('aria-labelledby', 'pills-edit-tab');
+                        var form = document.createElement('form');
+                        form.id = 'editForm';
+                        var textarea = document.createElement('textarea');
+                        textarea.style.width = '100%';
+                        textarea.style.height = '70vh';
+                        textarea.name = 'data';
+                        textarea.style.fontFamily = 'Courier New, monospace'; // Set the font to a monospaced font
+                        textarea.textContent = jsyaml.dump(data.data);
+                        form.appendChild(textarea);
+                        tabPaneEdit.appendChild(form);
+
+
+                        // Create the logs tab
+                        var liLogs = document.createElement('li');
+                        liLogs.className = 'nav-item';
+                        liLogs.setAttribute('role', 'presentation');
+                        var btnLogs = document.createElement('button');
+                        btnLogs.className = 'nav-link';
+                        btnLogs.id = 'pills-logs-tab';
+                        btnLogs.setAttribute('data-bs-toggle', 'pill');
+                        btnLogs.setAttribute('data-bs-target', '#pills-logs');
+                        btnLogs.setAttribute('type', 'button');
+                        btnLogs.setAttribute('role', 'tab');
+                        btnLogs.setAttribute('aria-controls', 'pills-logs');
+                        btnLogs.setAttribute('aria-selected', 'false');
+                        btnLogs.textContent = 'Logs';
+                        liLogs.appendChild(btnLogs);
+
+                        ul.appendChild(liLogs);
+
+                        var tabPaneLogs = document.createElement('div');
+                        tabPaneLogs.className = 'tab-pane fade';
+                        tabPaneLogs.id = 'pills-logs';
+                        tabPaneLogs.setAttribute('role', 'tabpanel');
+                        tabPaneLogs.setAttribute('aria-labelledby', 'pills-logs-tab');
+
+                        tabContent.appendChild(tabPaneLogs);
+
+                        btnLogs.onclick = function() {
+                            var ws = new WebSocket('ws://localhost:8080/logs?namespace=' + data.data.metadata.namespace + '&name=' + data.data.metadata.name);
+                            ws.onmessage = function(event) {
+                                tabPaneLogs.textContent += event.data + '\n';
+                            };
+                        };
+
+                        // Change the modal label to whatever the page
+                        var modalLabel = document.querySelector('#modalLabel');
+                        modalLabel.textContent = modalLabelContent;
+                        
+
+                        tabContent.appendChild(tabPaneView);
+                        tabContent.appendChild(tabPaneEdit);
+                        modalBody.appendChild(tabContent);
+
+                        var saveButton = document.querySelector('#modal .modal-footer .btn-success');
+                        saveButton.onclick = function(e) {
+                        e.preventDefault();
+                        var formElement = document.querySelector('#editForm');
+                        var formData = new FormData(formElement);
+
+                        // Create a JSON object from the form data
+                        var jsonObject = {};
+                        for (const [key, value]  of formData.entries()) {
+                            jsonObject[key] = value;
+                        }
+
+                        fetch(dataUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(jsonObject)
+                        }).then(response => {
+                                if (!response.ok) {
+                                    // throw new Error('Network response was not ok');
+                                    return response.text().then(errorText => {
+                                        throw new Error(errorText);
+                                    });
+                                }else{
+                                    // Update the toast body with the a success message
+                                    var toastBody = document.querySelector('#liveToast .toast-body');
+                                    toastBody.textContent = 'Object updated succesfully';
+                                    // toastBody.parentElement.className = 'bg-success text-white';
+                                    var toastHeader = document.querySelector('#header-text');
+                                    toastHeader.textContent = 'Success';
+                                    // Show the toast
+                                    var toastLiveExample = document.getElementById('liveToast');
+
+
+                                    // Change the toast color to green
+                                    toastLiveExample.classList.remove('bg-danger');
+                                    toastLiveExample.classList.add('bg-success');
+                                    
+                                    var toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+                                    toastBootstrap.show();
+                                }
+                                // Keep the modal open
+                            }).catch(error => {
+                                console.error('There has been a problem with your fetch operation:', error);
+
+                                // Update the toast body with the error message
+                                var toastBody = document.querySelector('#liveToast .toast-body');
+                                toastBody.textContent = 'There has been a problem with your fetch operation: ' + error;
+                                var toastHeader = document.querySelector('#header-text');
+                                toastHeader.textContent = 'Error';
+                                // Show the toast
+                                var toastLiveExample = document.getElementById('liveToast');
+                                
+                                // Change the toast color to red
+                                toastLiveExample.classList.remove('bg-success');
+                                toastLiveExample.classList.add('bg-danger');
+                                
+                                var toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+                                toastBootstrap.show();
+                            });
+                        };
+
+                        $('#modal').modal('show');
+                        });
+            };
+        }
+    </script>
+  
+  
+  </body>
+  </html>
+  
+
+{{ end }}

@@ -1,0 +1,83 @@
+{{ template "header" . }}
+
+
+
+<script>
+  var ws = new WebSocket('ws://localhost:8080/wsPods');
+
+  var table = $('#dataTable').DataTable({
+    columns: [
+        { title: "Name" },
+        { title: "Namespace" },
+        { title: "Phase" },
+        { title: "Containers" },
+        { title: "Node Selector" },
+        { title: "Restart Count" },
+        { title: "Age" },
+        { title: "Status Message" }
+    ],
+    createdRow: function (row, data, dataIndex) {
+        handleRowClick(row, {
+            metadata: {
+                name: data[0],
+                namespace: data[1]
+            }
+        },
+        '/pod?namespace=' + data[1] + '&name=' + data[0],
+        'Pod '+data[1]
+        );
+    }
+});
+
+ws.onmessage = function(event) {
+    var messageData = JSON.parse(event.data);
+
+    var dropdownMenu = document.querySelector('#namespaces');
+    dropdownMenu.innerHTML = '';
+
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.className = 'dropdown-item';
+    a.href = '?namespace=';
+    a.textContent = "All namespaces";
+    li.appendChild(a);
+    dropdownMenu.appendChild(li);
+
+    messageData.namespaces.forEach(function(namespace) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'dropdown-item';
+        a.href = '?namespace=' + namespace.metadata.name;
+        a.textContent = namespace.metadata.name;
+        li.appendChild(a);
+        dropdownMenu.appendChild(li);
+    });
+
+    table.clear();
+
+    messageData.pods.forEach(function(pod) {
+        var nodeSelector = pod.spec.nodeSelector ? JSON.stringify(pod.spec.nodeSelector).replace(/^{(.*)}$/, '$1') : 'None';
+        var creationTimestamp = new Date(pod.metadata.creationTimestamp);
+        var age = getAge(creationTimestamp);
+        var statusMessage = pod.status.message || "-";
+
+        table.row.add([
+            pod.metadata.name,
+            pod.metadata.namespace,
+            pod.status.phase,
+            pod.spec.containers.map(container => container.name).join(', '),
+            nodeSelector,
+            pod.status.containerStatuses[0].restartCount,
+            age,
+            statusMessage
+        ]);
+    });
+
+    table.draw();
+};
+
+
+
+
+</script>
+{{ template "footer" . }}

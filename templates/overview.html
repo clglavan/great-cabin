@@ -1,0 +1,171 @@
+{{ template "header" . }}
+
+<div class=" text-center">
+
+  <div class="row">
+
+    <div class="col">
+      
+          <h3>Unhealthy / Restarting Pods</h3>
+          <table id="unhealthy-pods" class="table table-hover">
+          </table>
+    
+      </div>
+      <div class="col">
+              
+
+          <h3>Failed Events</h3>
+          <table id="failed-events" class="table table-hover">
+              
+          </table>
+
+
+
+      </div>
+</div>
+
+    <div class="row">
+            {{ if .data.ClusterMetrics }}
+            <h3>Irregular Cluster metrics</h3>
+            <table cla  ss="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Name </th>
+                  <th scope="col">Namespace </th>
+                  <th scope="col">Container </th>
+                  <th scope="col">CPU usage </th>
+                  <th scope="col">CPU request </th>
+                  <th scope="col">CPU % </th>
+                  <th scope="col">CPU limit </th>
+                  <th scope="col">Memory usage </th>
+                  <th scope="col">Memory request </th>
+                  <th scope="col">Memory % </th>
+                  <th scope="col">Memory limit </th>
+                </tr>
+              </thead >
+              <tbody>
+                  {{ range $key, $metric := .data.ClusterMetrics }}
+                      {{ $metricStatus := index $metric "metricStatus" }}
+                      {{ if eq $metricStatus "1" "2" "3" }}
+                      <tr>
+                      
+                          <td>{{ index $metric "podName" }}</td>
+                          <td>{{ index $metric "namespace" }}</td>
+                          <td>{{ index $metric "containerName" }}</td>
+                          <td>{{ index $metric "cpuUsage" }}</td>
+                          <td>{{ index $metric "cpuRequests" }}</td>
+                          <td>{{ index $metric "cpuPercentage" }}</td>
+                          <td>{{ index $metric "cpuLimits" }}</td>
+                          <td>{{ index $metric "memoryUsage" }}</td>
+                          <td>{{ index $metric "memoryRequests" }}</td>
+                          <td>{{ index $metric "memoryLimits" }}</td>
+                      </tr>
+                      {{ end }}
+                  {{ end }}
+                
+              </tbody>
+            </table>
+            {{ end }}
+                
+    </div>
+
+</div>
+
+
+
+<script>
+  var ws = new WebSocket('ws://localhost:8080/wsOverview');
+
+  var unhealthyPodsTable = $('#unhealthy-pods').DataTable({
+      columns: [
+          { title: "Name" },
+          { title: "Namespace" },
+          { title: "Phase" },
+          { title: "Message" },
+      ],
+      createdRow: function (row, data, dataIndex) {
+          handleRowClick(row, {
+              metadata: {
+                  name: data[0],
+                  namespace: data[1]
+              }
+          }, '/pod?namespace=' + data[1] + '&name=' + data[0], 'Pod ' + data[0]);
+      }
+  });
+
+  var failedEventsTable = $('#failed-events').DataTable({
+      columns: [
+          { title: "Name" },
+          { title: "Namespace" },
+          { title: "Component" },
+          { title: "Message" },
+      ],
+      createdRow: function (row, data, dataIndex) {
+          handleRowClick(row, {
+              metadata: {
+                  name: data[0],
+                  namespace: data[1]
+              }
+          }, '/event?namespace=' + data[1] + '&name=' + data[0], 'Event ' + data[0]);
+      }
+  });
+
+  ws.onmessage = function(event) {
+    var messageData = JSON.parse(event.data);
+
+    var dropdownMenu = document.querySelector('#namespaces');
+    dropdownMenu.innerHTML = '';
+
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.className = 'dropdown-item';
+    a.href = '?namespace=';
+    a.textContent = "All namespaces";
+    li.appendChild(a);
+    dropdownMenu.appendChild(li);
+
+    console.log(messageData.pods);
+    // console.log(event.data);
+
+    messageData.namespaces.forEach(function(namespace) {
+        // console.log(namespace); // Add this line
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'dropdown-item';
+        a.href = '?namespace=' + namespace.metadata.name;
+        a.textContent = namespace.metadata.name;
+        li.appendChild(a);
+        dropdownMenu.appendChild(li);
+    });
+
+    unhealthyPodsTable.clear();
+    failedEventsTable.clear();
+
+    messageData.pods.forEach(function(pod) {
+        if(pod.status.phase != "Running" && pod.status.phase != "Succeeded"){
+            unhealthyPodsTable.row.add([
+                pod.metadata.name,
+                pod.metadata.namespace,
+                pod.status.phase,
+                pod.status.message ? pod.status.message : "No message - check logs"
+            ]);
+        }
+    });
+
+    messageData.events.forEach(function(event) {
+        if(event.type == "Warning") {
+            failedEventsTable.row.add([
+                event.metadata.name,
+                event.metadata.namespace,
+                event.source.component ? event.source.component : "",
+                event.message
+            ]);
+        }
+    });
+
+    unhealthyPodsTable.draw();
+    failedEventsTable.draw();
+};
+  
+</script>
+{{ template "footer" . }}

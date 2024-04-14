@@ -1,0 +1,77 @@
+{{ template "header" . }}
+
+
+  
+
+<script>
+  var ws = new WebSocket('ws://localhost:8080/wsEvents');
+
+  var table = $('#dataTable').DataTable({
+    columns: [
+        { title: "Name" },
+        { title: "Component" },
+        { title: "Message" },
+        { title: "Namespace" },
+        { title: "First Timestamp" },
+        { title: "Last Timestamp" },
+        { title: "Count" },
+        { title: "Involved Object Name" }
+      ],
+    createdRow: function (row, data, dataIndex) {
+        console.log(data);
+        handleRowClick(row, {
+            metadata: {
+                name: data[0],
+                component: data[1]
+            }
+        },  
+        '/event?namespace=' + data[3] + '&name=' + data[0],
+        'Event '+data[0]);
+    }
+  });
+
+  ws.onmessage = function(event) {
+      var messageData = JSON.parse(event.data);
+
+      var dropdownMenu = document.querySelector('#namespaces');
+      dropdownMenu.innerHTML = '';
+
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.className = 'dropdown-item';
+      a.href = '?namespace=';
+      a.textContent = "All namespaces";
+      li.appendChild(a);
+      dropdownMenu.appendChild(li);
+
+      messageData.namespaces.forEach(function(namespace) {
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.className = 'dropdown-item';
+          a.href = '?namespace=' + namespace.metadata.name;
+          a.textContent = namespace.metadata.name;
+          li.appendChild(a);
+          dropdownMenu.appendChild(li);
+      });
+
+
+      table.clear();
+
+      messageData.events.forEach(function(event) {
+          table.row.add([
+            event.metadata.name,
+            event.source.component ? event.source.component : "",
+            event.message ? event.message : "",
+            event.metadata.namespace,
+            event.firstTimestamp,
+            event.lastTimestamp,
+            event.count ? event.count : "",
+            event.involvedObject.name
+          ]);
+      });
+
+      table.draw();
+  };
+
+</script>
+{{ template "footer" . }}

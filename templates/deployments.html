@@ -1,0 +1,64 @@
+{{ template "header" . }}
+
+<script>
+  var ws = new WebSocket('ws://localhost:8080/wsDeployments');
+
+
+  var table = $('#dataTable').DataTable({
+    columns: [
+        { title: "Name" },
+        { title: "Namespace" }
+      ],
+    createdRow: function (row, data, dataIndex) {
+        handleRowClick(row, {
+            metadata: {
+                name: data[0],
+                namespace: data[1]
+            }
+        },  
+        '/deployment?namespace=' + data[1] + '&name=' + data[0],
+        'Deployment '+data[1]);
+    }
+  });
+
+  ws.onmessage = function(event) {
+      var messageData = JSON.parse(event.data);
+
+      var dropdownMenu = document.querySelector('#namespaces');
+      dropdownMenu.innerHTML = '';
+
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.className = 'dropdown-item';
+      a.href = '?namespace=';
+      a.textContent = "All namespaces";
+      li.appendChild(a);
+      dropdownMenu.appendChild(li);
+
+      messageData.namespaces.forEach(function(namespace) {
+          // console.log(namespace); // Add this line
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.className = 'dropdown-item';
+          a.href = '?namespace=' + namespace.metadata.name;
+          a.textContent = namespace.metadata.name;
+          li.appendChild(a);
+          dropdownMenu.appendChild(li);
+      });
+
+      table.clear();
+
+      messageData.deployments.forEach(function(deployment) {
+          table.row.add([
+              deployment.metadata.name,
+              deployment.metadata.namespace
+          ]);
+      });
+
+      table.draw();
+  };
+
+
+
+</script>
+{{ template "footer" . }}

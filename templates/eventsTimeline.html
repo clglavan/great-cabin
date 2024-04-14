@@ -1,0 +1,132 @@
+{{ template "header" . }}
+
+
+  
+
+<div id="timelineEvents" ></div>
+
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script> -->
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+  var diagramDefinition = 'timeline\n';
+  // Initialize mermaid
+  // document.addEventListener('DOMContentLoaded', (event) => {
+
+    var config = { 
+      startOnLoad:true, 
+      theme: 'neutral',
+      maxTextSize: 150000,
+      logLevel: 'debug',
+      themeVariables: {
+        "fontFamily": "Fira-Sans-Regular",
+    },
+    // flowchart:{ 
+    //     useMaxWidth:false, 
+    //     htmlLabels:false
+    //  } 
+    };
+    mermaid.initialize(config);
+    // // Initialize mermaid
+    // mermaid.initialize({
+    //   startOnLoad: true,
+    //   theme: 'neutral',
+    //   maxTextSize: 150000,
+    //   logLevel: 'debug',
+    // });
+
+    var ws = new WebSocket('ws://localhost:8080/wsEvents');
+
+    ws.onmessage = function(event) {
+      var messageData = JSON.parse(event.data);
+
+      // Sort the events by their type
+      messageData.events.sort(function(a, b) {
+        if (a.involvedObject.kind < b.involvedObject.kind) {
+          return -1;
+        } else if (a.involvedObject.kind > b.involvedObject.kind) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+      // Start the diagram definition
+      
+      var lastObjectType = null;
+
+      // Add new data
+      messageData.events.forEach(function(event) {
+        if (event.lastTimestamp) {
+          var eventDate = new Date(event.lastTimestamp);
+          if (!isNaN(eventDate.getTime())) { // Check if the date is valid
+            // Format the date for Mermaid.js
+            var formattedDate = eventDate.toISOString().split('T')[0];
+
+            // Add the event to the diagram definition
+            var objectType = event.involvedObject.kind;
+            if (objectType !== lastObjectType) {
+              // Include the object type in the diagram definition
+              diagramDefinition += '    ' + objectType + ' : done, ' + formattedDate + ', ' + formattedDate + '\n';
+              lastObjectType = objectType;
+            } else {
+              // Don't include the object type in the diagram definition
+              diagramDefinition += '    ' + ' : done, ' + formattedDate + ', ' + formattedDate + '\n';
+            }
+          }
+        }
+      });
+      console.log(diagramDefinition);
+
+    //   diagramDefinition = `timeline
+    // title History of Social Media Platform
+    // 2002 : LinkedIn
+    // 2004 : Facebook : Google
+    // 2005 : Youtube
+    // 2006 : Twitter`
+
+      var element = document.querySelector('#timelineEvents');
+      mermaid.render('timeline', diagramDefinition).then((svg) => {
+        console.log(svg);
+        element.innerHTML = svg.svg;
+      })
+
+      // console.log(svg);
+      // element.innerHTML = svg;
+
+    };
+
+    // var element = document.querySelector('#timelineEvents');
+    // console.log(diagramDefinition);
+    // const { svg } = await mermaid.render('timeline', diagramDefinition);
+    // element.innerHTML = svg;
+
+  // });
+  // const drawDiagram = async function () {
+  //   console.log(diagramDefinition);
+  //   var element = document.querySelector('#timelineEvents');
+  //   const { svg } = await mermaid.render('timeline', diagramDefinition);
+  //   element.innerHTML = svg;
+  // };
+
+  // await drawDiagram();
+
+  // function renderMermaid(diagramDefinition) {
+  //   // Render the diagram
+  //   // console.log(diagramDefinition)
+  //     var container = document.getElementById('timeline');
+  //     // setTimeout(function() {
+  //       mermaid.render('theGraph', diagramDefinition, function(svgCode) {
+  //         // console.log(this.diagramDefinition);
+  //         container.insertAdjacentHTML('beforeend', svgCode);
+  //       });
+  //     // }, 2000);
+
+      
+  // } 
+</script>
+
+{{ template "footer" . }}
